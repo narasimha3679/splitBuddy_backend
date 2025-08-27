@@ -1,0 +1,52 @@
+### Register
+POST http://localhost:4321/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test3@example.com",
+  "password": "secure123",
+  "name": "Test User"
+}
+
+### Get all users with jwt token
+GET http://localhost:4321/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+### Login to get JWT token
+POST http://localhost:4321/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test3@example.com",
+  "password": "secure123"
+}
+
+### Get user info
+GET http://localhost:4321/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+
+### get user with email
+GET http://localhost:4321/api/users/search?email=test3@example.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+
+### get friends
+GET http://localhost:4321/api/friends/b366f233-d035-4d0c-a6d5-222b057e78c3/friends
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+
+### get pending friend requests
+GET http://localhost:4321/api/friends/2e669c2a-301a-4dbf-a716-21e37f3098d5/pending-requests
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+
+### send friend request
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+{
+  "senderId": "b366f233-d035-4d0c-a6d5-222b057e78c3",
+  "receiverId": "2e669c2a-301a-4dbf-a716-21e37f3098d5"
+}

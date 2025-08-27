@@ -1,0 +1,36 @@
+package com.splitbuddy.splitbuddy.models;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "friendships")
+@Getter
+@Setter
+public class Friendship {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "friend_id", nullable = false)
+    private User friend;
+
+    private LocalDateTime becameFriendsAt;
+
+}

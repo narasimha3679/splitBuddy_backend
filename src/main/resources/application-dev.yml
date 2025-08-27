@@ -1,0 +1,7 @@
+logbook:
+  format:
+    style: http
+logging:
+  level:
+    org.zalando.logbook: TRACE
+    org.springframework.web: TRACE
