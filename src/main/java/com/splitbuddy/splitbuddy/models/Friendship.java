@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "friendships")
 @Getter
@@ -25,10 +27,12 @@ public class Friendship {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference("friendships")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "friend_id", nullable = false)
+    @JsonBackReference("friendships")
     private User friend;
 
     private LocalDateTime becameFriendsAt;

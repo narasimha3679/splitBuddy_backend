@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,12 +26,13 @@ public class Bill {
 
     @ManyToOne
     @JoinColumn(name = "paid_by")
+    @JsonBackReference("bills")
     private User paidBy;
 
-//    @ManyToOne
-//    @JoinColumn(name = "group_id")
-//   // private Group group;
-//
-//    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL)
-//    private List<BillShare> shares;
+    // @ManyToOne
+    // @JoinColumn(name = "group_id")
+    // // private Group group;
+    //
+    // @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL)
+    // private List<BillShare> shares;
 }

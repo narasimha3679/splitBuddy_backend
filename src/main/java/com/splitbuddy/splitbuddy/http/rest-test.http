@@ -27,7 +27,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItO
 
 
 ### get user with email
-GET http://localhost:4321/api/users/search?email=test3@example.com
+GET http://localhost:4321/api/users/search?email=narasimha.sinivarapu@gmail.com
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
 
 

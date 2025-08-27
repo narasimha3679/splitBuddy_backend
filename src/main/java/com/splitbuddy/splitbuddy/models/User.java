@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -34,11 +36,18 @@ public class User {
     private String passwordHash;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @JsonManagedReference("sender")
     private List<FriendRequest> sentRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @JsonManagedReference("receiver")
     private List<FriendRequest> receivedRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference("friendships")
     private List<Friendship> friendships = new ArrayList<>();
+
+    @OneToMany(mappedBy = "paidBy", cascade = CascadeType.ALL)
+    @JsonManagedReference("bills")
+    private List<Bill> bills = new ArrayList<>();
 }
