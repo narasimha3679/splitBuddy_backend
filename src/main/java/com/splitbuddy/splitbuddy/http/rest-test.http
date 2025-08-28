@@ -57,3 +57,26 @@ PUT http://localhost:4321/api/friends/requests/73d88c6c-84f5-47dc-bc38-e9486365c
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
 
+
+### create group with members
+POST http://localhost:4321/api/groups
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+{
+  "name": "New Group",
+  "memberIds": [
+    "b366f233-d035-4d0c-a6d5-222b057e78c3",
+    "2e669c2a-301a-4dbf-a716-21e37f3098d5"
+  ]
+}
+
+
+### get my groups
+GET http://localhost:4321/api/groups/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+
+
+### delete group
+DELETE http://localhost:4321/api/groups/9bf9506b-a8eb-4838-b07a-184dbe341859
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw

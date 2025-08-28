@@ -7,10 +7,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.splitbuddy.splitbuddy.dto.response.PendingFriendRequestsResponseDto;
+import com.splitbuddy.splitbuddy.exceptions.DuplicateResourceException;
+import com.splitbuddy.splitbuddy.exceptions.FriendRequestNotFoundException;
+import com.splitbuddy.splitbuddy.exceptions.InvalidOperationException;
+import com.splitbuddy.splitbuddy.exceptions.UserNotFoundException;
 import com.splitbuddy.splitbuddy.models.FriendRequest;
 import com.splitbuddy.splitbuddy.models.FriendRequestStatus;
 import com.splitbuddy.splitbuddy.models.Friendship;
@@ -31,14 +34,14 @@ public class FriendService {
 
     public FriendRequest sendFriendRequest(User sender, User receiver) {
         if (sender.equals(receiver)) {
-            throw new IllegalArgumentException("Cannot send friend request to yourself");
+            throw new InvalidOperationException("Cannot send friend request to yourself");
         }
         // Check if a request already exists which is not rejected
         Optional<FriendRequest> existingRequest = friendRequestRepository
                 .findBySenderAndReceiver(sender, receiver);
 
         if (existingRequest.isPresent() && existingRequest.get().getStatus() != FriendRequestStatus.REJECTED) {
-            throw new IllegalStateException("Friend request already exists");
+            throw new DuplicateResourceException("Friend request already exists");
         }
 
         FriendRequest request = new FriendRequest();
@@ -50,12 +53,13 @@ public class FriendService {
         return friendRequestRepository.save(request);
     }
 
-    public FriendRequest respondToFriendRequest(UUID requestId, FriendRequestStatus response) throws NotFoundException {
+    public FriendRequest respondToFriendRequest(UUID requestId, FriendRequestStatus response) {
         FriendRequest request = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException());
+                .orElseThrow(
+                        () -> new FriendRequestNotFoundException("Friend request not found with ID: " + requestId));
 
         if (request.getStatus() != FriendRequestStatus.PENDING) {
-            throw new IllegalStateException("Request already processed");
+            throw new InvalidOperationException("Request already processed");
         }
 
         request.setStatus(response);
@@ -82,9 +86,9 @@ public class FriendService {
         friendshipRepository.saveAll(Arrays.asList(friendship1, friendship2));
     }
 
-    public List<User> getFriends(UUID userId) throws NotFoundException {
+    public List<User> getFriends(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException());
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
         return friendshipRepository.findByUser(user).stream()
                 .map(friendship -> friendship.getFriend())

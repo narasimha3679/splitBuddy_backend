@@ -2,6 +2,7 @@ package com.splitbuddy.splitbuddy.dto.request;
 
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,9 @@ import lombok.Setter;
 @Setter
 public class FriendRequestDto {
 
+    @NotNull(message = "Sender ID is required")
     private UUID senderId;
-    private UUID receiverId;
 
+    @NotNull(message = "Receiver ID is required")
+    private UUID receiverId;
 }
