@@ -8,7 +8,7 @@ Content-Type: application/json
   "name": "Test User"
 }
 
-### Get all users with jwt token
+### Get all users 
 GET http://localhost:4321/api/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
 
@@ -32,12 +32,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItO
 
 
 ### get friends
-GET http://localhost:4321/api/friends/b366f233-d035-4d0c-a6d5-222b057e78c3/friends
+GET http://localhost:4321/api/friends/2e669c2a-301a-4dbf-a716-21e37f3098d5/friends
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
 
 
 ### get pending friend requests
-GET http://localhost:4321/api/friends/2e669c2a-301a-4dbf-a716-21e37f3098d5/pending-requests
+GET http://localhost:4321/api/friends/eedec663-6830-479c-9f9c-be2fdb57204d/pending-requests
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
 
 
@@ -50,3 +50,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItO
   "senderId": "b366f233-d035-4d0c-a6d5-222b057e78c3",
   "receiverId": "2e669c2a-301a-4dbf-a716-21e37f3098d5"
 }
+
+
+### accept friend request
+PUT http://localhost:4321/api/friends/requests/73d88c6c-84f5-47dc-bc38-e9486365c451?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZWRkMDhjNy0wZjYxLTQzNmItOWJjNC1kNzE4NWUzNTBhZjYiLCJpYXQiOjE3NTYyNjMzMDQsImV4cCI6MTc2MTQ0NzMwNH0.tjw2Qg4_xsopBMLNn3u3ewI6MWqxLElEgIH1ReXh-rw
+

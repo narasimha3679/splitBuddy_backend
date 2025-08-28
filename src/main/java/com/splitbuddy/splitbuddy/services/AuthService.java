@@ -52,7 +52,8 @@ public class AuthService {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
         if (userOpt.isEmpty()) {
 
-            return new AuthResponse(null, "Invalid email or password");
+            // return status 404
+            return new AuthResponse(null, "User not found");
         }
 
         User user = userOpt.get();

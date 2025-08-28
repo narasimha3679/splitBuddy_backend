@@ -30,6 +30,7 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<User> searchUsersByEmail(@RequestParam String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        return ResponseEntity.ok(user.orElse(null));
+
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

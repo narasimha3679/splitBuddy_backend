@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.splitbuddy.splitbuddy.dto.response.PendingFriendRequestsResponseDto;
 import com.splitbuddy.splitbuddy.models.FriendRequest;
 import com.splitbuddy.splitbuddy.models.FriendRequestStatus;
 import com.splitbuddy.splitbuddy.models.Friendship;
@@ -32,11 +33,11 @@ public class FriendService {
         if (sender.equals(receiver)) {
             throw new IllegalArgumentException("Cannot send friend request to yourself");
         }
-
+        // Check if a request already exists which is not rejected
         Optional<FriendRequest> existingRequest = friendRequestRepository
                 .findBySenderAndReceiver(sender, receiver);
 
-        if (existingRequest.isPresent()) {
+        if (existingRequest.isPresent() && existingRequest.get().getStatus() != FriendRequestStatus.REJECTED) {
             throw new IllegalStateException("Friend request already exists");
         }
 
@@ -90,7 +91,20 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    public List<FriendRequest> getPendingRequests(User receiver) {
-        return friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING);
+    public List<PendingFriendRequestsResponseDto> getPendingRequests(User receiver) {
+        // i need to include sender id in the response since friend request table
+        // doesn't have the sender
+
+        return friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING)
+                .stream()
+                .map(request -> {
+                    PendingFriendRequestsResponseDto dto = new PendingFriendRequestsResponseDto();
+                    dto.setId(request.getId());
+                    dto.setStatus(request.getStatus());
+                    dto.setSender(request.getSender());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
     }
 }

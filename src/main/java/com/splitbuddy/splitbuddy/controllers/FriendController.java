@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.splitbuddy.splitbuddy.dto.request.FriendRequestDto;
+import com.splitbuddy.splitbuddy.dto.response.PendingFriendRequestsResponseDto;
 import com.splitbuddy.splitbuddy.models.FriendRequest;
 import com.splitbuddy.splitbuddy.models.FriendRequestStatus;
 import com.splitbuddy.splitbuddy.models.User;
@@ -57,10 +58,11 @@ public class FriendController {
     }
 
     @GetMapping("/{userId}/pending-requests")
-    public ResponseEntity<List<FriendRequest>> getPendingRequests(@PathVariable UUID userId) throws NotFoundException {
+    public ResponseEntity<List<PendingFriendRequestsResponseDto>> getPendingRequests(@PathVariable UUID userId)
+            throws NotFoundException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException());
-        List<FriendRequest> requests = friendService.getPendingRequests(user);
+        List<PendingFriendRequestsResponseDto> requests = friendService.getPendingRequests(user);
         return ResponseEntity.ok(requests);
     }
 }
