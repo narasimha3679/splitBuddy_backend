@@ -1,0 +1,9 @@
+### Test Groups Endpoint - Should return clean JSON without circular references
+GET http://localhost:4321/api/groups/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2NDM1NjMzLCJleHAiOjE3NjE2MTk2MzN9.IvTUnKsaL5_ut1ch2XlP0wQgfrKQLYpkQ-_ZKW5NRuo
+
+### Test All Groups Endpoint
+GET http://localhost:4321/api/groups
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2NDM1NjMzLCJleHAiOjE3NjE2MTk2MzN9.IvTUnKsaL5_ut1ch2XlP0wQgfrKQLYpkQ-_ZKW5NRuo
+
+

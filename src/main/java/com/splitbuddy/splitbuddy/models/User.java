@@ -13,7 +13,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -24,8 +23,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
 
@@ -48,6 +47,6 @@ public class User {
     private List<Friendship> friendships = new ArrayList<>();
 
     @OneToMany(mappedBy = "paidBy", cascade = CascadeType.ALL)
-    @JsonManagedReference("bills")
-    private List<Bill> bills = new ArrayList<>();
+    @JsonManagedReference("expenses")
+    private List<Expense> expenses = new ArrayList<>();
 }

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,14 +33,14 @@ public class GroupService {
     public List<Group> getMyGroups() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userIdString = authentication.getName();
-        UUID userId = UUID.fromString(userIdString);
+        Long userId = Long.valueOf(userIdString);
         return groupRepository.findByMembers_Id(userId);
     }
 
     public Group createGroup(CreateGroupRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String creatorIdString = authentication.getName();
-        UUID creatorId = UUID.fromString(creatorIdString);
+        Long creatorId = Long.valueOf(creatorIdString);
 
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new UserNotFoundException("Creator not found with ID: " + creatorId));
@@ -57,14 +56,14 @@ public class GroupService {
         if (request.getMemberIds() != null) {
             for (String memberIdString : request.getMemberIds()) {
                 try {
-                    UUID memberId = UUID.fromString(memberIdString);
+                    Long memberId = Long.valueOf(memberIdString);
                     if (memberId.equals(creatorId)) {
                         continue; // already added
                     }
                     Optional<User> userOpt = userRepository.findById(memberId);
                     userOpt.ifPresent(members::add);
-                } catch (IllegalArgumentException ignored) {
-                    // skip invalid UUIDs silently
+                } catch (NumberFormatException ignored) {
+                    // skip invalid Long values silently
                 }
             }
         }
@@ -75,12 +74,12 @@ public class GroupService {
 
     public void deleteGroup(String id) {
         try {
-            UUID groupId = UUID.fromString(id);
+            Long groupId = Long.valueOf(id);
             if (!groupRepository.existsById(groupId)) {
                 throw new GroupNotFoundException("Group not found with ID: " + id);
             }
             groupRepository.deleteById(groupId);
-        } catch (IllegalArgumentException e) {
+        } catch (NumberFormatException e) {
             throw new GroupNotFoundException("Invalid group ID format: " + id);
         }
     }

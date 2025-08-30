@@ -1,16 +1,14 @@
 package com.splitbuddy.splitbuddy.repositories;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.splitbuddy.splitbuddy.models.Group;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface GroupRepository extends JpaRepository<Group, UUID> {
+import java.util.List;
 
-    List<Group> findAll();
+@Repository
+public interface GroupRepository extends JpaRepository<Group, Long> {
 
-    List<Group> findByMembers_Id(UUID memberId);
+    List<Group> findByMembers_Id(Long memberId);
 
 }

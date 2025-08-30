@@ -1,7 +1,6 @@
 package com.splitbuddy.splitbuddy.models;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,8 +23,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class FriendRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)

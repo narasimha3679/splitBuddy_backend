@@ -2,7 +2,6 @@ package com.splitbuddy.splitbuddy.models;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +22,8 @@ import lombok.Setter;
 public class Group {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
 
     // created by

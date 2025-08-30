@@ -1,19 +1,13 @@
 package com.splitbuddy.splitbuddy.dto.response;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
-import com.splitbuddy.splitbuddy.models.FriendRequestStatus;
-import com.splitbuddy.splitbuddy.models.User;
+import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
+@Data
 public class PendingFriendRequestsResponseDto {
-
-    private UUID id;
-    private FriendRequestStatus status;
-    private User sender;
-
+    private Long id;
+    private String senderName;
+    private String senderEmail;
+    private LocalDateTime createdAt;
 }

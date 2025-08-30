@@ -1,0 +1,31 @@
+### Get User Balance Summary (for authenticated user)
+GET http://localhost:4321/api/expenses/balance/summary
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+### Get User Balance Summary by User ID
+GET http://localhost:4321/api/expenses/user/4/balance/summary
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+
+### Get individual Expenses Between Friends
+GET http://localhost:4321/api/expenses/friend/4/expenses
+Authorization:Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+
+### Get All Expenses for a Group
+GET http://localhost:4321/api/expenses/group/1/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+
+### Get Friend Balances (existing endpoint)
+GET http://localhost:4321/api/expenses/user/4/balances
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+
+### Get Expenses by Group (existing endpoint)
+GET http://localhost:4321/api/expenses/group/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+### Get All User Expenses (existing endpoint)
+GET http://localhost:4321/api/expenses
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo

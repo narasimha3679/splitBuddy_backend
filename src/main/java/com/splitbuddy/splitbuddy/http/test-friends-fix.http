@@ -1,0 +1,17 @@
+### Test Friends Endpoint - Fixed JSON Issue
+GET http://localhost:4321/api/friends/1
+Content-Type: application/json
+
+### Expected Response Format:
+# [
+#   {
+#     "id": 2,
+#     "name": "John Doe",
+#     "email": "john@example.com"
+#   },
+#   {
+#     "id": 3,
+#     "name": "Jane Smith", 
+#     "email": "jane@example.com"
+#   }
+# ]

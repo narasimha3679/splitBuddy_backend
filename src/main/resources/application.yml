@@ -13,6 +13,13 @@ spring:
   jwt:
     secret: your_secret_key_which_is_long_enough_123456
     expiration: 5184000000 # 60 days in milliseconds
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
 
 server:
   port: 4321

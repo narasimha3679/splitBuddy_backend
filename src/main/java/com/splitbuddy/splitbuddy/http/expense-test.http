@@ -1,0 +1,105 @@
+### Test 1: Create expense with payer INCLUDED in participants (correct approach)
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+{
+  "title": "movie",
+  "description": "Group movie night with friends",
+  "amount": 100,
+  "currency": "USD",
+  "category": "Food & Dining",
+  "paidBy": "2",
+  "paidAt": "2024-01-15T19:30:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 20,
+      "source": "FRIEND",
+      "sourceId": null  
+    },
+    {
+      "userId": "2",
+      "amount": 50,
+      "source": "FRIEND",
+      "sourceId": null  
+    },
+    {
+      "userId": "3",
+      "amount": 30,
+      "source": "FRIEND",
+      "sourceId": null  
+    }
+  ]
+}
+
+
+### Test 2: Create expense with group participants (creator included)
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+{
+  "title": "Group Trip Expenses",
+  "description": "Shared expenses for group trip",
+  "amount": 300,
+  "currency": "USD",
+  "category": "Travel",
+  "paidBy": "1",
+  "paidAt": "2024-01-15T21:00:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 100,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "2",
+      "amount": 200,
+      "source": "GROUP",
+      "sourceId": "1"
+    }
+  ]
+}
+
+
+### create expense between friends and group
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
+
+{
+  "title": "Mixed Expense",
+  "description": "Dinner with friends and group",
+  "amount": 200,
+  "currency": "USD",
+  "category": "Food & Dining",
+  "paidBy": "1",
+  "paidAt": "2024-01-15T19:30:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 50,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "2",
+      "amount": 100,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "4",
+      "amount": 50,
+      "source": "FRIEND",
+      "sourceId": null
+    }
+  ]
+}
+
+
+### Test 4: get expenses
+GET http://localhost:4321/api/expenses
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo

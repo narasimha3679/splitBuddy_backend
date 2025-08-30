@@ -1,16 +1,17 @@
 package com.splitbuddy.splitbuddy.repositories;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.splitbuddy.splitbuddy.models.Friendship;
 import com.splitbuddy.splitbuddy.models.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
+import java.util.List;
+
+@Repository
+public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
     List<Friendship> findByUser(User user);
 
     boolean existsByUserAndFriend(User user, User friend);
+
 }

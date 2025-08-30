@@ -1,7 +1,6 @@
 package com.splitbuddy.splitbuddy.services;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -68,7 +67,7 @@ public class AuthService {
     public UserInfoResponse getUserInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userIdString = authentication.getName();
-        UUID userId = UUID.fromString(userIdString);
+        Long userId = Long.valueOf(userIdString);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userIdString));
