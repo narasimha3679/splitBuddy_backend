@@ -8,7 +8,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzL
 
 
 ### Get individual Expenses Between Friends
-GET http://localhost:4321/api/expenses/friend/4/expenses
+GET http://localhost:4321/api/expenses/friend/2/expenses
 Authorization:Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
 
 
@@ -18,7 +18,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzL
 
 
 ### Get Friend Balances (existing endpoint)
-GET http://localhost:4321/api/expenses/user/4/balances
+GET http://localhost:4321/api/expenses/user/2/balances
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
 
 

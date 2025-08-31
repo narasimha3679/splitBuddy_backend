@@ -35,12 +35,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
                         "ORDER BY e.createdAt DESC")
         List<Expense> findExpensesByGroupId(@Param("groupId") Long groupId);
 
-        // Find expenses shared between two specific users (as friends)
+        // Find expenses shared between two specific users (regardless of source)
         @Query("SELECT DISTINCT e FROM Expense e " +
                         "JOIN e.participants ep1 " +
                         "JOIN e.participants ep2 " +
                         "WHERE ep1.user.id = :userId1 AND ep2.user.id = :userId2 " +
-                        "AND ep1.source = 'FRIEND' AND ep2.source = 'FRIEND' " +
                         "ORDER BY e.createdAt DESC")
         List<Expense> findExpensesBetweenFriends(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 

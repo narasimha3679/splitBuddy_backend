@@ -132,7 +132,7 @@ curl -X GET "http://localhost:8080/api/expenses/group/2/all" \
 - **Zero balance**: No outstanding balance between user and friend
 
 ### Friend Expense Calculation
-- Only considers expenses where both users are participants and the source is 'FRIEND'
+- Considers all expenses where both users are participants (regardless of source - FRIEND, GROUP, or mixed)
 - Calculates individual balances based on who paid for each expense
 - Provides a complete list of shared expenses for transparency
 

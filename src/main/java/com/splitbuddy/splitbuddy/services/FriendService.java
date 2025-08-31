@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.splitbuddy.splitbuddy.dto.request.FriendRequestDto;
 import com.splitbuddy.splitbuddy.dto.response.FriendResponse;
+import com.splitbuddy.splitbuddy.dto.response.FriendRequestResponse;
 import com.splitbuddy.splitbuddy.dto.response.PendingFriendRequestsResponseDto;
+import com.splitbuddy.splitbuddy.dto.response.UserResponse;
 import com.splitbuddy.splitbuddy.exceptions.DuplicateResourceException;
 import com.splitbuddy.splitbuddy.exceptions.FriendRequestNotFoundException;
 import com.splitbuddy.splitbuddy.exceptions.InvalidOperationException;
@@ -33,7 +35,7 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
 
-    public void sendFriendRequest(FriendRequestDto requestDto) {
+    public FriendRequestResponse sendFriendRequest(FriendRequestDto requestDto) {
         User sender = userRepository.findById(requestDto.getSenderId())
                 .orElseThrow(() -> new UserNotFoundException("Sender not found"));
         User receiver = userRepository.findById(requestDto.getReceiverId())
@@ -57,10 +59,12 @@ public class FriendService {
         request.setStatus(FriendRequestStatus.PENDING);
         request.setCreatedAt(LocalDateTime.now());
 
-        friendRequestRepository.save(request);
+        FriendRequest savedRequest = friendRequestRepository.save(request);
+
+        return convertToFriendRequestResponse(savedRequest);
     }
 
-    public void acceptFriendRequest(Long requestId) {
+    public FriendRequestResponse acceptFriendRequest(Long requestId) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(
                         () -> new FriendRequestNotFoundException("Friend request not found with ID: " + requestId));
@@ -70,12 +74,14 @@ public class FriendService {
         }
 
         request.setStatus(FriendRequestStatus.ACCEPTED);
-        friendRequestRepository.save(request);
+        FriendRequest savedRequest = friendRequestRepository.save(request);
 
         createFriendship(request.getSender(), request.getReceiver());
+
+        return convertToFriendRequestResponse(savedRequest);
     }
 
-    public void rejectFriendRequest(Long requestId) {
+    public FriendRequestResponse rejectFriendRequest(Long requestId) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(
                         () -> new FriendRequestNotFoundException("Friend request not found with ID: " + requestId));
@@ -85,10 +91,12 @@ public class FriendService {
         }
 
         request.setStatus(FriendRequestStatus.REJECTED);
-        friendRequestRepository.save(request);
+        FriendRequest savedRequest = friendRequestRepository.save(request);
+
+        return convertToFriendRequestResponse(savedRequest);
     }
 
-    public FriendRequest respondToFriendRequest(Long requestId, FriendRequestStatus response) {
+    public FriendRequestResponse respondToFriendRequest(Long requestId, FriendRequestStatus response) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(
                         () -> new FriendRequestNotFoundException("Friend request not found with ID: " + requestId));
@@ -103,7 +111,8 @@ public class FriendService {
             createFriendship(request.getSender(), request.getReceiver());
         }
 
-        return friendRequestRepository.save(request);
+        FriendRequest savedRequest = friendRequestRepository.save(request);
+        return convertToFriendRequestResponse(savedRequest);
     }
 
     private void createFriendship(User user1, User user2) {
@@ -133,34 +142,48 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    public List<PendingFriendRequestsResponseDto> getPendingRequests(Long userId) {
+    public List<FriendRequestResponse> getPendingRequests(Long userId) {
         User receiver = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
         return friendRequestRepository.findByReceiverIdAndStatus(userId, FriendRequestStatus.PENDING)
                 .stream()
-                .map(request -> {
-                    PendingFriendRequestsResponseDto dto = new PendingFriendRequestsResponseDto();
-                    dto.setId(request.getId());
-                    dto.setSenderName(request.getSender().getName());
-                    dto.setSenderEmail(request.getSender().getEmail());
-                    dto.setCreatedAt(request.getCreatedAt());
-                    return dto;
-                })
+                .map(this::convertToFriendRequestResponse)
                 .collect(Collectors.toList());
     }
 
-    public List<PendingFriendRequestsResponseDto> getPendingRequests(User receiver) {
+    public List<FriendRequestResponse> getPendingRequests(User receiver) {
         return friendRequestRepository.findByReceiverIdAndStatus(receiver.getId(), FriendRequestStatus.PENDING)
                 .stream()
-                .map(request -> {
-                    PendingFriendRequestsResponseDto dto = new PendingFriendRequestsResponseDto();
-                    dto.setId(request.getId());
-                    dto.setSenderName(request.getSender().getName());
-                    dto.setSenderEmail(request.getSender().getEmail());
-                    dto.setCreatedAt(request.getCreatedAt());
-                    return dto;
-                })
+                .map(this::convertToFriendRequestResponse)
                 .collect(Collectors.toList());
+    }
+
+    public FriendRequestResponse getFriendRequest(Long requestId) {
+        FriendRequest request = friendRequestRepository.findById(requestId)
+                .orElseThrow(
+                        () -> new FriendRequestNotFoundException("Friend request not found with ID: " + requestId));
+
+        return convertToFriendRequestResponse(request);
+    }
+
+    private UserResponse convertToUserResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setName(user.getName());
+        userResponse.setEmail(user.getEmail());
+        return userResponse;
+    }
+
+    private FriendRequestResponse convertToFriendRequestResponse(FriendRequest request) {
+        FriendRequestResponse response = new FriendRequestResponse();
+        response.setId(request.getId());
+        response.setSenderName(request.getSender().getName());
+        response.setSenderEmail(request.getSender().getEmail());
+        response.setCreatedAt(request.getCreatedAt().toString());
+        response.setStatus(request.getStatus());
+        response.setSender(convertToUserResponse(request.getSender()));
+        response.setReceiver(convertToUserResponse(request.getReceiver()));
+        return response;
     }
 }

@@ -1,0 +1,26 @@
+### Test Friend Request Creation
+POST http://localhost:8080/api/friends/requests
+Content-Type: application/json
+
+{
+  "senderId": 1,
+  "receiverId": 2
+}
+
+### Test Get Pending Friend Requests
+GET http://localhost:8080/api/friends/2/pending-requests
+
+### Test Get Single Friend Request
+GET http://localhost:8080/api/friends/requests/1
+
+### Test Accept Friend Request
+PUT http://localhost:8080/api/friends/requests/1/accept
+
+### Test Reject Friend Request
+PUT http://localhost:8080/api/friends/requests/1/reject
+
+### Test Respond to Friend Request (Generic)
+PUT http://localhost:8080/api/friends/requests/1?response=ACCEPTED
+
+### Test Respond to Friend Request (Generic)
+PUT http://localhost:8080/api/friends/requests/1?response=REJECTED

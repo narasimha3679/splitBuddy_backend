@@ -2,7 +2,6 @@ package com.splitbuddy.splitbuddy.controllers;
 
 import com.splitbuddy.splitbuddy.dto.request.FriendRequestDto;
 import com.splitbuddy.splitbuddy.dto.response.FriendResponse;
-import com.splitbuddy.splitbuddy.dto.response.PendingFriendRequestsResponseDto;
 import com.splitbuddy.splitbuddy.models.FriendRequestStatus;
 import com.splitbuddy.splitbuddy.services.FriendService;
 
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import com.splitbuddy.splitbuddy.dto.response.FriendRequestResponse;
 
 @RestController
 @RequestMapping("/api/friends")
@@ -28,17 +28,17 @@ public class FriendController {
     }
 
     @PostMapping("/requests")
-    public ResponseEntity<String> sendFriendRequest(@Valid @RequestBody FriendRequestDto request) {
+    public ResponseEntity<FriendRequestResponse> sendFriendRequest(@Valid @RequestBody FriendRequestDto request) {
         try {
-            friendService.sendFriendRequest(request);
-            return new ResponseEntity<>("Friend request sent successfully", HttpStatus.CREATED);
+            FriendRequestResponse response = friendService.sendFriendRequest(request);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to send friend request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/requests/{requestId}")
-    public ResponseEntity<String> respondToFriendRequest(
+    public ResponseEntity<FriendRequestResponse> respondToFriendRequest(
             @PathVariable Long requestId,
             @RequestParam String response) {
         try {
@@ -48,34 +48,33 @@ public class FriendController {
             } else if ("REJECTED".equalsIgnoreCase(response)) {
                 status = FriendRequestStatus.REJECTED;
             } else {
-                return new ResponseEntity<>("Invalid response. Use 'ACCEPTED' or 'REJECTED'", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            friendService.respondToFriendRequest(requestId, status);
-            return ResponseEntity.ok("Friend request " + response.toLowerCase());
+            FriendRequestResponse friendRequestResponse = friendService.respondToFriendRequest(requestId, status);
+            return ResponseEntity.ok(friendRequestResponse);
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to respond to friend request: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/requests/{requestId}/accept")
-    public ResponseEntity<String> acceptFriendRequest(@PathVariable Long requestId) {
+    public ResponseEntity<FriendRequestResponse> acceptFriendRequest(@PathVariable Long requestId) {
         try {
-            friendService.acceptFriendRequest(requestId);
-            return ResponseEntity.ok("Friend request accepted");
+            FriendRequestResponse response = friendService.acceptFriendRequest(requestId);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to accept friend request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/requests/{requestId}/reject")
-    public ResponseEntity<String> rejectFriendRequest(@PathVariable Long requestId) {
+    public ResponseEntity<FriendRequestResponse> rejectFriendRequest(@PathVariable Long requestId) {
         try {
-            friendService.rejectFriendRequest(requestId);
-            return ResponseEntity.ok("Friend request rejected");
+            FriendRequestResponse response = friendService.rejectFriendRequest(requestId);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to reject friend request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -90,10 +89,20 @@ public class FriendController {
     }
 
     @GetMapping("/{userId}/pending-requests")
-    public ResponseEntity<List<PendingFriendRequestsResponseDto>> getPendingRequests(@PathVariable Long userId) {
+    public ResponseEntity<List<FriendRequestResponse>> getPendingRequests(@PathVariable Long userId) {
         try {
-            List<PendingFriendRequestsResponseDto> requests = friendService.getPendingRequests(userId);
+            List<FriendRequestResponse> requests = friendService.getPendingRequests(userId);
             return ResponseEntity.ok(requests);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/requests/{requestId}")
+    public ResponseEntity<FriendRequestResponse> getFriendRequest(@PathVariable Long requestId) {
+        try {
+            FriendRequestResponse request = friendService.getFriendRequest(requestId);
+            return ResponseEntity.ok(request);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
