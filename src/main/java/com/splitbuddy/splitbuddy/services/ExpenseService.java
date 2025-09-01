@@ -4,6 +4,7 @@ import com.splitbuddy.splitbuddy.dto.request.CreateExpenseRequest;
 import com.splitbuddy.splitbuddy.dto.response.ExpenseResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendExpensesResponse;
+import com.splitbuddy.splitbuddy.dto.response.GroupBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.SettlementResponse;
 import com.splitbuddy.splitbuddy.dto.response.UserBalanceSummaryResponse;
 import com.splitbuddy.splitbuddy.exceptions.ExpenseNotFoundException;
@@ -37,6 +38,7 @@ public class ExpenseService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final FriendshipRepository friendshipRepository;
+    private final BalanceService balanceService;
 
     @Transactional
     public ExpenseResponse createExpense(CreateExpenseRequest request) {
@@ -101,6 +103,9 @@ public class ExpenseService {
         // Save expense and participants
         expense.setParticipants(participants);
         Expense savedExpense = expenseRepository.save(expense);
+
+        // Update balance aggregates
+        balanceService.updateBalancesForExpense(savedExpense);
 
         log.info("Expense created successfully with ID: {}", savedExpense.getId());
         return convertToResponse(savedExpense);
@@ -180,7 +185,7 @@ public class ExpenseService {
 
     public List<FriendBalanceResponse> getFriendBalances(String userIdString) {
         Long userId = Long.valueOf(userIdString);
-        return calculateFriendBalances(userId);
+        return balanceService.getFriendBalances(userId);
     }
 
     public List<ExpenseResponse> getRecentActivities() {
@@ -206,12 +211,12 @@ public class ExpenseService {
         String userIdString = authentication.getName();
         Long userId = Long.valueOf(userIdString);
 
-        return calculateUserBalanceSummary(userId);
+        return balanceService.getUserBalanceSummary(userId);
     }
 
     public UserBalanceSummaryResponse getUserBalanceSummaryById(String userIdString) {
         Long userId = Long.valueOf(userIdString);
-        return calculateUserBalanceSummary(userId);
+        return balanceService.getUserBalanceSummary(userId);
     }
 
     public FriendExpensesResponse getExpensesBetweenFriends(String friendIdString) {
@@ -220,7 +225,7 @@ public class ExpenseService {
         Long userId = Long.valueOf(userIdString);
         Long friendId = Long.valueOf(friendIdString);
 
-        return calculateFriendExpenses(userId, friendId);
+        return balanceService.getFriendExpenses(userId, friendId);
     }
 
     public List<ExpenseResponse> getAllExpensesForGroup(Long groupId) {
@@ -230,200 +235,13 @@ public class ExpenseService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Calculate comprehensive balance summary for a user across all expenses
-     * they're involved in.
-     * 
-     * Balance calculation logic:
-     * - totalOwed: Sum of amounts others owe to the user (when user paid for
-     * expenses)
-     * - totalOwes: Sum of amounts user owes to others (when others paid for
-     * expenses)
-     * - netBalance: totalOwed - totalOwes (positive = user is owed money, negative
-     * = user owes money)
-     */
-    private UserBalanceSummaryResponse calculateUserBalanceSummary(Long userId) {
-        // Get all expenses where user is involved (as payer or participant)
-        List<Expense> userExpenses = expenseRepository.findAllExpensesForUser(userId);
-
-        BigDecimal totalOwed = BigDecimal.ZERO; // Amount others owe to this user
-        BigDecimal totalOwes = BigDecimal.ZERO; // Amount this user owes to others
-
-        for (Expense expense : userExpenses) {
-            User payer = expense.getPaidBy();
-
-            // Find the user's participation in this expense
-            ExpenseParticipant userParticipation = null;
-            for (ExpenseParticipant participant : expense.getParticipants()) {
-                if (participant.getUser().getId().equals(userId)) {
-                    userParticipation = participant;
-                    break;
-                }
-            }
-
-            // Skip if user is not a participant in this expense
-            if (userParticipation == null) {
-                continue;
-            }
-
-            BigDecimal userAmount = userParticipation.getAmount();
-
-            if (payer.getId().equals(userId)) {
-                // User paid for this expense
-                // Calculate how much others owe to the user
-                BigDecimal othersOweToUser = BigDecimal.ZERO;
-                for (ExpenseParticipant participant : expense.getParticipants()) {
-                    if (!participant.getUser().getId().equals(userId)) {
-                        othersOweToUser = othersOweToUser.add(participant.getAmount());
-                    }
-                }
-                totalOwed = totalOwed.add(othersOweToUser);
-            } else {
-                // Someone else paid for this expense
-                // User owes the payer their share
-                totalOwes = totalOwes.add(userAmount);
-            }
-        }
-
-        // Get user details
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
-
-        UserBalanceSummaryResponse response = new UserBalanceSummaryResponse();
-        response.setUserId(userId);
-        response.setUserName(user.getName());
-        response.setTotalOwed(totalOwed);
-        response.setTotalOwes(totalOwes);
-        response.setNetBalance(totalOwed.subtract(totalOwes));
-
-        return response;
+    public List<GroupBalanceResponse> getGroupBalances(Long groupId) {
+        return balanceService.getGroupBalancesForGroup(groupId);
     }
 
-    private FriendExpensesResponse calculateFriendExpenses(Long userId, Long friendId) {
-        // Get expenses shared between the two users
-        List<Expense> sharedExpenses = expenseRepository.findExpensesBetweenFriends(userId, friendId);
-
-        BigDecimal totalOwedToFriend = BigDecimal.ZERO; // Amount user owes to friend
-        BigDecimal totalOwedByFriend = BigDecimal.ZERO; // Amount friend owes to user
-
-        for (Expense expense : sharedExpenses) {
-            User payer = expense.getPaidBy();
-
-            // Find the amounts for both users in this expense
-            BigDecimal userAmount = BigDecimal.ZERO;
-            BigDecimal friendAmount = BigDecimal.ZERO;
-
-            for (ExpenseParticipant participant : expense.getParticipants()) {
-                if (participant.getUser().getId().equals(userId)) {
-                    userAmount = participant.getAmount();
-                } else if (participant.getUser().getId().equals(friendId)) {
-                    friendAmount = participant.getAmount();
-                }
-            }
-
-            if (payer.getId().equals(userId)) {
-                // User paid, friend owes user
-                totalOwedByFriend = totalOwedByFriend.add(friendAmount);
-            } else if (payer.getId().equals(friendId)) {
-                // Friend paid, user owes friend
-                totalOwedToFriend = totalOwedToFriend.add(userAmount);
-            }
-        }
-
-        // Get friend details
-        User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new UserNotFoundException("Friend not found: " + friendId));
-
-        FriendExpensesResponse response = new FriendExpensesResponse();
-        response.setFriendId(friendId);
-        response.setFriendName(friend.getName());
-        response.setTotalOwedToFriend(totalOwedToFriend);
-        response.setTotalOwedByFriend(totalOwedByFriend);
-        response.setNetBalance(totalOwedByFriend.subtract(totalOwedToFriend));
-        response.setSharedExpenses(sharedExpenses.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList()));
-
-        return response;
-    }
-
-    /**
-     * Calculate individual balances with each friend for a user.
-     * 
-     * Balance calculation logic:
-     * - Positive balance: Friend owes money to the user
-     * - Negative balance: User owes money to the friend
-     * - Zero balance: No outstanding balance between user and friend
-     */
-    private List<FriendBalanceResponse> calculateFriendBalances(Long userId) {
-        // Get all expenses where user is involved (as payer or participant)
-        List<Expense> userExpenses = expenseRepository.findAllExpensesForUser(userId);
-
-        Map<Long, BigDecimal> friendBalances = new HashMap<>();
-
-        for (Expense expense : userExpenses) {
-            User payer = expense.getPaidBy();
-
-            // Find the user's participation in this expense
-            ExpenseParticipant userParticipation = null;
-            for (ExpenseParticipant participant : expense.getParticipants()) {
-                if (participant.getUser().getId().equals(userId)) {
-                    userParticipation = participant;
-                    break;
-                }
-            }
-
-            // Skip if user is not a participant in this expense
-            if (userParticipation == null) {
-                continue;
-            }
-
-            BigDecimal userAmount = userParticipation.getAmount();
-
-            // Calculate balances with each friend in this expense
-            for (ExpenseParticipant participant : expense.getParticipants()) {
-                User participantUser = participant.getUser();
-                BigDecimal participantAmount = participant.getAmount();
-
-                // Skip if this is the same user
-                if (participantUser.getId().equals(userId)) {
-                    continue;
-                }
-
-                Long friendId = participantUser.getId();
-                BigDecimal currentBalance = friendBalances.getOrDefault(friendId, BigDecimal.ZERO);
-
-                if (payer.getId().equals(userId)) {
-                    // User paid for this expense, friend owes user
-                    currentBalance = currentBalance.add(participantAmount);
-                } else if (payer.getId().equals(friendId)) {
-                    // Friend paid for this expense, user owes friend
-                    currentBalance = currentBalance.subtract(userAmount);
-                }
-
-                friendBalances.put(friendId, currentBalance);
-            }
-        }
-
-        // Convert to response format with proper friend names
-        return friendBalances.entrySet().stream()
-                .map(entry -> {
-                    FriendBalanceResponse response = new FriendBalanceResponse();
-                    response.setFriendId(entry.getKey());
-
-                    // Get friend name from user repository
-                    try {
-                        User friend = userRepository.findById(entry.getKey())
-                                .orElseThrow(() -> new UserNotFoundException("Friend not found: " + entry.getKey()));
-                        response.setFriendName(friend.getName());
-                    } catch (UserNotFoundException e) {
-                        response.setFriendName("Unknown User");
-                    }
-
-                    response.setBalance(entry.getValue());
-                    return response;
-                })
-                .collect(Collectors.toList());
+    public List<GroupBalanceResponse> getUserGroupBalances(String userIdString) {
+        Long userId = Long.valueOf(userIdString);
+        return balanceService.getGroupBalances(userId);
     }
 
     private ExpenseResponse convertToResponse(Expense expense) {

@@ -1,0 +1,431 @@
+### ========================================
+### COMPLETE SPLITBUDDY SETUP SCRIPT
+### This script creates a complete environment with:
+### - 4 users
+### - Friendships between all users
+### - 2 groups (one with all users, one with users 1&2)
+### - Various types of expenses
+### ========================================
+
+### Step 1: Create 4 Users
+### ========================================
+
+### Create User 1 - Alice
+POST http://localhost:4321/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "password123",
+  "name": "Alice Johnson"
+}
+
+
+
+### Create User 2 - Bob
+POST http://localhost:4321/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "bob@example.com",
+  "password": "password123",
+  "name": "Bob Smith"
+}
+
+
+
+### Create User 3 - Charlie
+POST http://localhost:4321/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "charlie@example.com",
+  "password": "password123",
+  "name": "Charlie Brown"
+}
+
+
+
+### Create User 4 - Diana
+POST http://localhost:4321/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "diana@example.com",
+  "password": "password123",
+  "name": "Diana Prince"
+}
+
+
+
+### Step 2: Set up Friendships
+### ========================================
+
+### Alice sends friend request to Bob
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "senderId": "1",
+  "receiverId": "2"
+}
+
+### Alice sends friend request to Charlie
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "senderId": "1",
+  "receiverId": "3"
+}
+
+### Alice sends friend request to Diana
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "senderId": "1",
+  "receiverId": "4"
+}
+
+### Bob sends friend request to Charlie
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzU2Njc1NjQwLCJleHAiOjE3NjE4NTk2NDB9.XU8lnQlIDxUiFGKNbz_Z-hfpvpllI_uA6TyXcu4jmcY
+
+{
+  "senderId": "2",
+  "receiverId": "3"
+}
+
+### Bob sends friend request to Diana
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzU2Njc1NjQwLCJleHAiOjE3NjE4NTk2NDB9.XU8lnQlIDxUiFGKNbz_Z-hfpvpllI_uA6TyXcu4jmcY
+
+{
+  "senderId": "2",
+  "receiverId": "4"
+}
+
+### Charlie sends friend request to Diana
+POST http://localhost:4321/api/friends/requests
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWF0IjoxNzU2Njc1NzI4LCJleHAiOjE3NjE4NTk3Mjh9.lUJopA5zWp4HJ1H9br20l_9jUXTtxhsya6mC4nr9j7g
+
+{
+  "senderId": "3",
+  "receiverId": "4"
+}
+
+### Step 3: Accept all friend requests
+### ========================================
+
+### Bob accepts Alice's request
+PUT http://localhost:4321/api/friends/requests/1?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzU2Njc1NjQwLCJleHAiOjE3NjE4NTk2NDB9.XU8lnQlIDxUiFGKNbz_Z-hfpvpllI_uA6TyXcu4jmcY
+
+### Charlie accepts Alice's request
+PUT http://localhost:4321/api/friends/requests/2?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWF0IjoxNzU2Njc1NzI4LCJleHAiOjE3NjE4NTk3Mjh9.lUJopA5zWp4HJ1H9br20l_9jUXTtxhsya6mC4nr9j7g
+
+### Diana accepts Alice's request
+PUT http://localhost:4321/api/friends/requests/3?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2Njc1NzgyLCJleHAiOjE3NjE4NTk3ODJ9.z8_NlRelQ6UiMvoGGF5lMEt4kfzsAQfNa8oDPHrid8M
+
+### Charlie accepts Bob's request
+PUT http://localhost:4321/api/friends/requests/4?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWF0IjoxNzU2Njc1NzI4LCJleHAiOjE3NjE4NTk3Mjh9.lUJopA5zWp4HJ1H9br20l_9jUXTtxhsya6mC4nr9j7g
+
+### Diana accepts Bob's request
+PUT http://localhost:4321/api/friends/requests/5?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2Njc1NzgyLCJleHAiOjE3NjE4NTk3ODJ9.z8_NlRelQ6UiMvoGGF5lMEt4kfzsAQfNa8oDPHrid8M
+
+### Diana accepts Charlie's request
+PUT http://localhost:4321/api/friends/requests/6?response=ACCEPTED
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2Njc1NzgyLCJleHAiOjE3NjE4NTk3ODJ9.z8_NlRelQ6UiMvoGGF5lMEt4kfzsAQfNa8oDPHrid8M
+
+### Step 4: Create Groups
+### ========================================
+
+### Create Group 1: "The Gang" (All 4 users)
+POST http://localhost:4321/api/groups
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "name": "The Gang",
+  "memberIds": [
+    "1",
+    "2",
+    "3",
+    "4"
+  ]
+}
+
+
+### Create Group 2: "Best Friends" (Alice and Bob only)
+POST http://localhost:4321/api/groups
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "name": "Best Friends",
+  "memberIds": [
+    "1",
+    "2"
+  ]
+}
+
+
+
+### Step 5: Create Various Types of Expenses
+### ========================================
+
+### Expense 1: Friend-to-Friend Expense (Alice pays for Bob)
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "title": "Lunch at Restaurant",
+  "description": "Alice paid for both of us",
+  "amount": 50.00,
+  "currency": "USD",
+  "category": "Food & Dining",
+  "paidBy": "1",
+  "paidAt": "2024-01-15T12:30:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 25.00,
+      "source": "FRIEND",
+      "sourceId": null
+    },
+    {
+      "userId": "2",
+      "amount": 25.00,
+      "source": "FRIEND",
+      "sourceId": null
+    }
+  ]
+}
+
+### Expense 2: Group Expense (All 4 users in "The Gang")
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzU2Njc1NjQwLCJleHAiOjE3NjE4NTk2NDB9.XU8lnQlIDxUiFGKNbz_Z-hfpvpllI_uA6TyXcu4jmcY
+
+{
+  "title": "Weekend Trip",
+  "description": "Shared accommodation and activities",
+  "amount": 400.00,
+  "currency": "USD",
+  "category": "Travel",
+  "paidBy": "2",
+  "paidAt": "2024-01-16T10:00:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 100.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "2",
+      "amount": 100.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "3",
+      "amount": 100.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "4",
+      "amount": 100.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    }
+  ]
+}
+
+### Expense 3: Mixed Expense (Group + Friend)
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWF0IjoxNzU2Njc1NzI4LCJleHAiOjE3NjE4NTk3Mjh9.lUJopA5zWp4HJ1H9br20l_9jUXTtxhsya6mC4nr9j7g
+
+{
+  "title": "Movie Night",
+  "description": "Movie tickets and snacks",
+  "amount": 120.00,
+  "currency": "USD",
+  "category": "Entertainment",
+  "paidBy": "3",
+  "paidAt": "2024-01-17T19:00:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 30.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "2",
+      "amount": 30.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "3",
+      "amount": 30.00,
+      "source": "GROUP",
+      "sourceId": "1"
+    },
+    {
+      "userId": "4",
+      "amount": 30.00,
+      "source": "FRIEND",
+      "sourceId": null
+    }
+  ]
+}
+
+### Expense 4: Small Group Expense (Alice and Bob only)
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+{
+  "title": "Coffee Run",
+  "description": "Morning coffee for the team",
+  "amount": 24.00,
+  "currency": "USD",
+  "category": "Food & Dining",
+  "paidBy": "1",
+  "paidAt": "2024-01-18T08:30:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 12.00,
+      "source": "GROUP",
+      "sourceId": "2"
+    },
+    {
+      "userId": "2",
+      "amount": 12.00,
+      "source": "GROUP",
+      "sourceId": "2"
+    }
+  ]
+}
+
+### Expense 5: Unequal Split Expense
+POST http://localhost:4321/api/expenses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWF0IjoxNzU2Njc1NzgyLCJleHAiOjE3NjE4NTk3ODJ9.z8_NlRelQ6UiMvoGGF5lMEt4kfzsAQfNa8oDPHrid8M
+
+{
+  "title": "Dinner with Different Portions",
+  "description": "Some ordered more expensive items",
+  "amount": 180.00,
+  "currency": "USD",
+  "category": "Food & Dining",
+  "paidBy": "4",
+  "paidAt": "2024-01-19T20:00:00Z",
+  "participants": [
+    {
+      "userId": "1",
+      "amount": 45.00,
+      "source": "FRIEND",
+      "sourceId": null
+    },
+    {
+      "userId": "2",
+      "amount": 60.00,
+      "source": "FRIEND",
+      "sourceId": null
+    },
+    {
+      "userId": "3",
+      "amount": 45.00,
+      "source": "FRIEND",
+      "sourceId": null
+    },
+    {
+      "userId": "4",
+      "amount": 30.00,
+      "source": "FRIEND",
+      "sourceId": null
+    }
+  ]
+}
+
+### Step 6: Verification Queries
+### ========================================
+
+### Get all users
+GET http://localhost:4321/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get Alice's friends
+GET http://localhost:4321/api/friends/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get all groups
+GET http://localhost:4321/api/groups
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get Alice's groups
+GET http://localhost:4321/api/groups/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get all expenses
+GET http://localhost:4321/api/expenses
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get balances summary
+GET http://localhost:4321/api/balances/summary
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get balances for friends respective to logged in user
+GET http://localhost:4321/api/balances/friends
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get balances for friends with id.
+GET http://localhost:4321/api/balances/user/4/friends
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get balances for groups respective to logged in user
+GET http://localhost:4321/api/balances/groups
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+### Get balances for groups respective to logged in user
+GET http://localhost:4321/api/balances/group/1/balances
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2Njc1NTI3LCJleHAiOjE3NjE4NTk1Mjd9.r4svkNRwsCZQkeijEfZb8APU9AbSKkB4Ho9Xht2kSxo
+
+
+
+### ========================================
+### SCRIPT COMPLETED!
+### 
+### Created:
+### - 4 users (Alice, Bob, Charlie, Diana)
+### - 6 friendships (all users connected)
+### - 2 groups ("The Gang" with all users, "Best Friends" with Alice & Bob)
+### - 5 expenses (various types and splits)
+### 
+### You can now test the complete SplitBuddy functionality!
+### ========================================
+

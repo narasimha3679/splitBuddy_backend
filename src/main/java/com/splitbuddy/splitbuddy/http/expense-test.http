@@ -4,29 +4,23 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzU2NTMxMDMzLCJleHAiOjE3NjE3MTUwMzN9.6AYDaRVLGeI3edJUMAEn6Gtkr1lLD8bs6V8Y5XpCKYo
 
 {
-  "title": "movie",
-  "description": "Group movie night with friends",
+  "title": "walmart",
+  "description": "Groceries shopping",
   "amount": 100,
   "currency": "USD",
   "category": "Food & Dining",
-  "paidBy": "2",
+  "paidBy": "4",
   "paidAt": "2024-01-15T19:30:00Z",
   "participants": [
     {
-      "userId": "1",
+      "userId": "4",
       "amount": 20,
       "source": "FRIEND",
       "sourceId": null  
     },
     {
-      "userId": "2",
-      "amount": 50,
-      "source": "FRIEND",
-      "sourceId": null  
-    },
-    {
-      "userId": "3",
-      "amount": 30,
+      "userId": "1",
+      "amount": 80,
       "source": "FRIEND",
       "sourceId": null  
     }

@@ -4,6 +4,7 @@ import com.splitbuddy.splitbuddy.dto.request.CreateExpenseRequest;
 import com.splitbuddy.splitbuddy.dto.response.ExpenseResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendExpensesResponse;
+import com.splitbuddy.splitbuddy.dto.response.GroupBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.SettlementResponse;
 import com.splitbuddy.splitbuddy.dto.response.UserBalanceSummaryResponse;
 import com.splitbuddy.splitbuddy.services.ExpenseService;
@@ -80,6 +81,18 @@ public class ExpenseController {
     @GetMapping("/group/{groupId}/all")
     public ResponseEntity<List<ExpenseResponse>> getAllExpensesForGroup(@PathVariable Long groupId) {
         List<ExpenseResponse> response = expenseService.getAllExpensesForGroup(groupId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/group/{groupId}/balances")
+    public ResponseEntity<List<GroupBalanceResponse>> getGroupBalances(@PathVariable Long groupId) {
+        List<GroupBalanceResponse> response = expenseService.getGroupBalances(groupId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}/group-balances")
+    public ResponseEntity<List<GroupBalanceResponse>> getUserGroupBalances(@PathVariable String userId) {
+        List<GroupBalanceResponse> response = expenseService.getUserGroupBalances(userId);
         return ResponseEntity.ok(response);
     }
 }

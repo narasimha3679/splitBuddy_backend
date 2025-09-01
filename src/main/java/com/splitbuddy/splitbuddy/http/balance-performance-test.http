@@ -1,0 +1,54 @@
+### Balance Aggregation System Performance Tests
+
+### 1. Get User Balance Summary (New Optimized Endpoint)
+GET http://localhost:8080/api/balances/summary
+Authorization: Bearer {{authToken}}
+
+### 2. Get User Balance Summary (Legacy Endpoint - for comparison)
+GET http://localhost:8080/api/expenses/balance/summary
+Authorization: Bearer {{authToken}}
+
+### 3. Get Friend Balances (New Optimized Endpoint)
+GET http://localhost:8080/api/balances/friends
+Authorization: Bearer {{authToken}}
+
+### 4. Get Friend Balances (Legacy Endpoint - for comparison)
+GET http://localhost:8080/api/expenses/user/1/balances
+Authorization: Bearer {{authToken}}
+
+### 5. Get Friend Expenses (New Optimized Endpoint)
+GET http://localhost:8080/api/balances/friend/2/expenses
+Authorization: Bearer {{authToken}}
+
+### 6. Get Friend Expenses (Legacy Endpoint - for comparison)
+GET http://localhost:8080/api/expenses/friend/2/expenses
+Authorization: Bearer {{authToken}}
+
+### 7. Get Group Balances (New Feature)
+GET http://localhost:8080/api/balances/groups
+Authorization: Bearer {{authToken}}
+
+### 8. Get All Balances for a Specific Group
+GET http://localhost:8080/api/balances/group/1/balances
+Authorization: Bearer {{authToken}}
+
+### 9. Recalculate All Balances (Admin/Data Migration)
+POST http://localhost:8080/api/balances/recalculate
+Authorization: Bearer {{authToken}}
+
+### Performance Comparison Notes:
+# 
+# Expected Performance Improvements:
+# - User Balance Summary: 100-1000x faster (10ms vs 2-10s)
+# - Friend Balances: 100-1000x faster (15ms vs 3-15s)  
+# - Friend Expenses: 20-100x faster (50ms vs 1-5s)
+#
+# The new system uses pre-calculated balance aggregates instead of
+# iterating through all expenses on each request, making it scalable
+# to handle thousands of expenses efficiently.
+#
+# Key Benefits:
+# 1. O(1) balance retrieval instead of O(n) calculation
+# 2. Single database query instead of N+1 queries
+# 3. Minimal memory usage
+# 4. Consistent performance regardless of expense count

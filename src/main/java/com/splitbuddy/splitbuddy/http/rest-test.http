@@ -17,8 +17,8 @@ POST http://localhost:4321/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "test1@example.com",
-  "password": "secure123"
+  "email": "diana@example.com",
+  "password": "password123"
 }
 
 ### Get user info
