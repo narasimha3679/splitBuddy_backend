@@ -1,6 +1,7 @@
 package com.splitbuddy.splitbuddy.services;
 
 import com.splitbuddy.splitbuddy.dto.request.CreateExpenseRequest;
+import com.splitbuddy.splitbuddy.dto.request.UpdateExpenseRequest;
 import com.splitbuddy.splitbuddy.dto.response.ExpenseResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendExpensesResponse;
@@ -25,8 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -109,6 +112,152 @@ public class ExpenseService {
 
         log.info("Expense created successfully with ID: {}", savedExpense.getId());
         return convertToResponse(savedExpense);
+    }
+
+    /**
+     * Update an existing expense
+     */
+    @Transactional
+    public ExpenseResponse updateExpense(Long expenseId, UpdateExpenseRequest request) {
+        log.info("Updating expense ID: {}", expenseId);
+
+        // Find the expense
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found: " + expenseId));
+
+        // Verify current user has permission (must be payer or participant)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long currentUserId = Long.valueOf(authentication.getName());
+        
+        boolean isPayerOrParticipant = expense.getPaidBy().getId().equals(currentUserId) ||
+                expense.getParticipants().stream().anyMatch(p -> p.getUser().getId().equals(currentUserId));
+        
+        if (!isPayerOrParticipant) {
+            throw new InvalidOperationException("You don't have permission to update this expense");
+        }
+
+        // Reverse existing balance aggregates before updating
+        balanceService.reverseBalancesForExpense(expense);
+
+        // Update expense fields (only non-null values)
+        if (request.getTitle() != null) {
+            expense.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            expense.setDescription(request.getDescription());
+        }
+        if (request.getAmount() != null) {
+            expense.setAmount(request.getAmount());
+        }
+        if (request.getCurrency() != null) {
+            expense.setCurrency(request.getCurrency());
+        }
+        if (request.getCategory() != null) {
+            expense.setCategory(request.getCategory());
+        }
+        if (request.getPaidAt() != null) {
+            expense.setPaidAt(request.getPaidAt());
+        }
+        if (request.getPaidBy() != null) {
+            User newPayer = userRepository.findById(request.getPaidBy())
+                    .orElseThrow(() -> new UserNotFoundException("Payer not found: " + request.getPaidBy()));
+            expense.setPaidBy(newPayer);
+        }
+
+        // Update participants if provided
+        if (request.getParticipants() != null && !request.getParticipants().isEmpty()) {
+            // Remove old participants
+            expenseParticipantRepository.deleteAll(expense.getParticipants());
+            
+            // Create new participants
+            List<ExpenseParticipant> newParticipants = new ArrayList<>();
+            for (UpdateExpenseRequest.ParticipantRequest participantDto : request.getParticipants()) {
+                User participantUser = userRepository.findById(participantDto.getUserId())
+                        .orElseThrow(() -> new UserNotFoundException("Participant not found: " + participantDto.getUserId()));
+                
+                ExpenseParticipant participant = new ExpenseParticipant();
+                participant.setExpense(expense);
+                participant.setUser(participantUser);
+                participant.setAmount(participantDto.getAmount());
+                participant.setSource(participantDto.getSource());
+                participant.setSourceId(participantDto.getSourceId());
+                newParticipants.add(participant);
+            }
+            expense.setParticipants(newParticipants);
+        }
+
+        // Save updated expense
+        Expense updatedExpense = expenseRepository.save(expense);
+
+        // Recalculate balance aggregates
+        balanceService.updateBalancesForExpense(updatedExpense);
+
+        log.info("Expense updated successfully: {}", expenseId);
+        return convertToResponse(updatedExpense);
+    }
+
+    /**
+     * Delete an expense
+     */
+    @Transactional
+    public void deleteExpense(Long expenseId) {
+        log.info("Deleting expense ID: {}", expenseId);
+
+        // Find the expense
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found: " + expenseId));
+
+        // Verify current user has permission
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long currentUserId = Long.valueOf(authentication.getName());
+        
+        if (!expense.getPaidBy().getId().equals(currentUserId)) {
+            throw new InvalidOperationException("Only the payer can delete this expense");
+        }
+
+        // Reverse balance aggregates
+        balanceService.reverseBalancesForExpense(expense);
+
+        // Delete participants and expense
+        expenseParticipantRepository.deleteAll(expense.getParticipants());
+        expenseRepository.delete(expense);
+
+        log.info("Expense deleted successfully: {}", expenseId);
+    }
+
+    /**
+     * Update payment status of a participant
+     */
+    @Transactional
+    public void updateParticipantPaymentStatus(Long expenseId, Long participantId, boolean isPaid) {
+        log.info("Updating payment status for participant {} in expense {}: isPaid={}", participantId, expenseId, isPaid);
+
+        // Find the participant
+        ExpenseParticipant participant = expenseParticipantRepository.findById(participantId)
+                .orElseThrow(() -> new ExpenseNotFoundException("Participant not found: " + participantId));
+
+        // Verify the participant belongs to the expense
+        if (!participant.getExpense().getId().equals(expenseId)) {
+            throw new InvalidOperationException("Participant does not belong to this expense");
+        }
+
+        // Verify current user has permission (must be payer)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long currentUserId = Long.valueOf(authentication.getName());
+        
+        if (!participant.getExpense().getPaidBy().getId().equals(currentUserId)) {
+            throw new InvalidOperationException("Only the payer can mark payments");
+        }
+
+        // Update payment status
+        participant.setPaid(isPaid);
+        participant.setPaidAt(isPaid ? Instant.now() : null);
+        expenseParticipantRepository.save(participant);
+
+        // Update balances
+        balanceService.updateBalanceForPayment(participant.getExpense(), participant, isPaid);
+
+        log.info("Payment status updated successfully");
     }
 
     private void validateParticipantSource(CreateExpenseRequest.ParticipantRequest participantDto, User payer) {
@@ -256,6 +405,7 @@ public class ExpenseService {
         response.setCreatedAt(expense.getCreatedAt());
         response.setUpdatedAt(expense.getUpdatedAt());
         response.setPaidBy(expense.getPaidBy().getId());
+        response.setPaidByName(expense.getPaidBy().getName());
 
         List<ExpenseResponse.ParticipantResponse> participantResponses = expense.getParticipants().stream()
                 .map(this::convertParticipantToResponse)
@@ -267,12 +417,15 @@ public class ExpenseService {
 
     private ExpenseResponse.ParticipantResponse convertParticipantToResponse(ExpenseParticipant participant) {
         ExpenseResponse.ParticipantResponse response = new ExpenseResponse.ParticipantResponse();
+        response.setId(participant.getId());
         response.setUserId(participant.getUser().getId());
         response.setUserName(participant.getUser().getName());
         response.setAmount(participant.getAmount());
         response.setSource(participant.getSource());
         response.setSourceId(participant.getSourceId());
         response.setActive(participant.isActive());
+        response.setPaid(participant.isPaid());
+        response.setPaidAt(participant.getPaidAt());
         return response;
     }
 }

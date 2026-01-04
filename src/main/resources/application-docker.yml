@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/splitbuddy_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+  jwt:
+    secret: ${JWT_SECRET:your_secret_key_which_is_long_enough_123456}
+    expiration: ${JWT_EXPIRATION:5184000000}
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+server:
+  port: ${SERVER_PORT:4321}
+
+# Docker-specific logging
+logging:
+  level:
+    root: INFO
+    com.splitbuddy: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Disable dev tools in Docker
+spring.devtools.restart.enabled: false

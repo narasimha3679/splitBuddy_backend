@@ -14,6 +14,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Balance Controller
+ * 
+ * Handles balance calculations and summaries for users, friends, and groups.
+ * 
+ * Frontend Types: See expo/splitbuddy/src/types/api-contracts.ts
+ * - UserBalanceSummaryResponse, FriendBalanceResponse, GroupBalanceResponse, FriendExpensesResponse
+ * 
+ * API Documentation: See backend/API_DOCUMENTATION.md#balances
+ * OpenAPI Spec: See backend/openapi.yaml#/paths/balances
+ * 
+ * @see expo/splitbuddy/src/utils/api.ts for frontend API functions
+ */
 @RestController
 @RequestMapping("/api/balances")
 @RequiredArgsConstructor

@@ -10,6 +10,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    baseline-version: 3
+    locations: classpath:db/migration
   jwt:
     secret: your_secret_key_which_is_long_enough_123456
     expiration: 5184000000 # 60 days in milliseconds
@@ -22,12 +27,11 @@ spring:
       fail-on-unknown-properties: false
 
 server:
-  port: 4321
-
-# logbook:
-#   format:
-#     style: http
-# logging:
-#   level:
-#     org.zalando.logbook: TRACE
-#     # org.springframework.web: TRACE
+  port: 420
+  address: 0.0.0.0
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.splitbuddy: DEBUG

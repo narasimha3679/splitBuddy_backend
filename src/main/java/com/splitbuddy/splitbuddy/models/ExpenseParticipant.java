@@ -8,6 +8,7 @@ import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
 @Table(name = "expense_participants")
@@ -40,6 +41,12 @@ public class ExpenseParticipant {
 
     @Column(nullable = false)
     private boolean isActive = true;
+
+    @Column(name = "is_paid", nullable = false)
+    private boolean isPaid = false;
+
+    @Column(name = "paid_at")
+    private Instant paidAt;
 
     public enum ParticipantSource {
         FRIEND, // Participant added as a friend

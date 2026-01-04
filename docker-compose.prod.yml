@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: splitbuddy-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:splitbuddy_db}
+      POSTGRES_USER: ${POSTGRES_USER:splitbuddy_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432" # Only bind to localhost for security
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - splitbuddy-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-splitbuddy_user} -d ${POSTGRES_DB:-splitbuddy_db}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # SplitBuddy Backend Application
+  splitbuddy-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: splitbuddy-backend-prod
+    ports:
+      - "127.0.0.1:4321:4321" # Only bind to localhost for security
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-splitbuddy_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-splitbuddy_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SERVER_PORT: 4321
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:5184000000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - splitbuddy-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4321/actuator/health" ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/tmp
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: splitbuddy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - splitbuddy-backend
+    networks:
+      - splitbuddy-network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  splitbuddy-network:
+    driver: bridge
+    internal: false

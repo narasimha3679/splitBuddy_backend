@@ -1,6 +1,7 @@
 package com.splitbuddy.splitbuddy.dto.response;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,16 +20,21 @@ public class ExpenseResponse {
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long paidBy;
+    private Long paidBy; // ID of the user who paid
+    private String paidByName; // Name of the user who paid
     private List<ParticipantResponse> participants;
 
     @Data
     public static class ParticipantResponse {
+        private Long id;
         private Long userId;
         private String userName;
         private BigDecimal amount;
         private ParticipantSource source;
         private Long sourceId;
         private boolean isActive;
+        private boolean isPaid;
+        private Instant paidAt;
     }
 }
+

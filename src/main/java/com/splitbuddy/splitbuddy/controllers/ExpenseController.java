@@ -1,6 +1,8 @@
 package com.splitbuddy.splitbuddy.controllers;
 
 import com.splitbuddy.splitbuddy.dto.request.CreateExpenseRequest;
+import com.splitbuddy.splitbuddy.dto.request.UpdateExpenseRequest;
+import com.splitbuddy.splitbuddy.dto.request.UpdatePaymentStatusRequest;
 import com.splitbuddy.splitbuddy.dto.response.ExpenseResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendBalanceResponse;
 import com.splitbuddy.splitbuddy.dto.response.FriendExpensesResponse;
@@ -9,6 +11,8 @@ import com.splitbuddy.splitbuddy.dto.response.SettlementResponse;
 import com.splitbuddy.splitbuddy.dto.response.UserBalanceSummaryResponse;
 import com.splitbuddy.splitbuddy.services.ExpenseService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Expense Controller
+ * 
+ * Handles expense creation, retrieval, update, deletion, and balance calculations.
+ * 
+ * Frontend Types: See expo/splitbuddy/src/types/api-contracts.ts
+ * - CreateExpenseRequest, UpdateExpenseRequest, ExpenseResponse, UserBalanceSummaryResponse
+ * 
+ * API Documentation: See backend/API_DOCUMENTATION.md#expenses
+ * OpenAPI Spec: See backend/openapi.yaml#/paths/expenses
+ * 
+ * @see expo/splitbuddy/src/utils/api.ts for frontend API functions
+ */
 @RestController
 @RequestMapping("/api/expenses")
 @CrossOrigin(origins = "*")
@@ -28,6 +45,29 @@ public class ExpenseController {
     public ResponseEntity<ExpenseResponse> createExpense(@RequestBody CreateExpenseRequest request) {
         ExpenseResponse response = expenseService.createExpense(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{expenseId}")
+    public ResponseEntity<ExpenseResponse> updateExpense(
+            @PathVariable Long expenseId,
+            @Valid @RequestBody UpdateExpenseRequest request) {
+        ExpenseResponse response = expenseService.updateExpense(expenseId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{expenseId}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long expenseId) {
+        expenseService.deleteExpense(expenseId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{expenseId}/participants/{participantId}/payment")
+    public ResponseEntity<Void> updatePaymentStatus(
+            @PathVariable Long expenseId,
+            @PathVariable Long participantId,
+            @RequestBody UpdatePaymentStatusRequest request) {
+        expenseService.updateParticipantPaymentStatus(expenseId, participantId, request.isPaid());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{expenseId}")

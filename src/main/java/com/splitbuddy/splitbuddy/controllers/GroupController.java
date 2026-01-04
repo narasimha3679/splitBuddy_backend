@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
+import com.splitbuddy.splitbuddy.dto.request.AddGroupMemberRequest;
 import com.splitbuddy.splitbuddy.dto.request.CreateGroupRequest;
 import com.splitbuddy.splitbuddy.dto.response.GroupResponse;
 import com.splitbuddy.splitbuddy.models.Group;
@@ -21,6 +23,19 @@ import com.splitbuddy.splitbuddy.services.GroupService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Group Controller
+ * 
+ * Handles group creation, retrieval, and member management.
+ * 
+ * Frontend Types: See expo/splitbuddy/src/types/api-contracts.ts
+ * - CreateGroupRequest, AddGroupMemberRequest, GroupResponse, GroupMemberResponse
+ * 
+ * API Documentation: See backend/API_DOCUMENTATION.md#groups
+ * OpenAPI Spec: See backend/openapi.yaml#/paths/groups
+ * 
+ * @see expo/splitbuddy/src/utils/api.ts for frontend API functions
+ */
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
@@ -46,10 +61,32 @@ public class GroupController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupResponse> getGroupById(@PathVariable String groupId) {
+        Group group = groupService.getGroupById(groupId);
+        return ResponseEntity.ok(convertToResponse(group));
+    }
+
     @PostMapping
     public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody CreateGroupRequest request) {
         Group group = groupService.createGroup(request);
         return ResponseEntity.ok(convertToResponse(group));
+    }
+
+    @PutMapping("/{groupId}/members")
+    public ResponseEntity<GroupResponse> addMembers(
+            @PathVariable String groupId,
+            @Valid @RequestBody AddGroupMemberRequest request) {
+        Group group = groupService.addMembers(groupId, request.getMemberIds());
+        return ResponseEntity.ok(convertToResponse(group));
+    }
+
+    @DeleteMapping("/{groupId}/members/{userId}")
+    public ResponseEntity<Void> removeMember(
+            @PathVariable String groupId,
+            @PathVariable String userId) {
+        groupService.removeMember(groupId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
@@ -79,3 +116,4 @@ public class GroupController {
         return response;
     }
 }
+

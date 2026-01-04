@@ -1,0 +1,939 @@
+openapi: 3.0.3
+info:
+  title: SplitBuddy API
+  description: |
+    Complete API specification for SplitBuddy expense splitting application.
+    
+    **Base URL**: http://localhost:420/api (local development)
+    
+    **Authentication**: Most endpoints require a Bearer token in the Authorization header.
+  version: 1.0.0
+  contact:
+    name: SplitBuddy API Support
+
+servers:
+  - url: http://localhost:420/api
+    description: Local development server
+  - url: http://localhost:4321/api
+    description: Docker development server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration
+  - name: Users
+    description: User management endpoints
+  - name: Friends
+    description: Friend requests and friend management
+  - name: Groups
+    description: Group creation and management
+  - name: Expenses
+    description: Expense creation and retrieval
+  - name: Balances
+    description: Balance calculations and summaries
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate a user and receive a JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: user@example.com
+              password: password123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user account
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+            example:
+              email: user@example.com
+              password: password123
+              name: John Doe
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Get information about the currently authenticated user
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/search:
+    get:
+      tags:
+        - Users
+      summary: Search user by email
+      description: Search for a user by their email address
+      operationId: searchUserByEmail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+          description: User's email address
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friends/requests:
+    post:
+      tags:
+        - Friends
+      summary: Send friend request
+      description: Send a friend request to another user
+      operationId: sendFriendRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendRequestDto'
+      responses:
+        '201':
+          description: Friend request sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friends/requests/{requestId}:
+    put:
+      tags:
+        - Friends
+      summary: Respond to friend request
+      description: Accept or reject a friend request
+      operationId: respondToFriendRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Friend request ID
+        - name: response
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [ACCEPTED, REJECTED]
+          description: Response to the friend request
+      responses:
+        '200':
+          description: Request updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequestResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friends/{userId}:
+    get:
+      tags:
+        - Friends
+      summary: Get user's friends
+      description: Get all friends for a specific user
+      operationId: getFriends
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: List of friends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendResponse'
+
+  /friends/{userId}/pending-requests:
+    get:
+      tags:
+        - Friends
+      summary: Get pending friend requests
+      description: Get all pending friend requests for a user
+      operationId: getPendingRequests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: List of pending requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendRequestResponse'
+
+  /groups:
+    post:
+      tags:
+        - Groups
+      summary: Create group
+      description: Create a new group with members
+      operationId: createGroup
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '200':
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /groups/me:
+    get:
+      tags:
+        - Groups
+      summary: Get my groups
+      description: Get all groups for the current authenticated user
+      operationId: getMyGroups
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResponse'
+
+  /groups/{id}:
+    delete:
+      tags:
+        - Groups
+      summary: Delete group
+      description: Delete a group by ID
+      operationId: deleteGroup
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Group ID
+      responses:
+        '204':
+          description: Group deleted successfully
+
+  /expenses:
+    post:
+      tags:
+        - Expenses
+      summary: Create expense
+      description: Create a new expense with participants
+      operationId: createExpense
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExpenseRequest'
+      responses:
+        '201':
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Expenses
+      summary: Get user expenses
+      description: Get all expenses for the current authenticated user
+      operationId: getExpensesByUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseResponse'
+
+  /expenses/{expenseId}:
+    get:
+      tags:
+        - Expenses
+      summary: Get expense by ID
+      description: Get expense details by ID
+      operationId: getExpenseById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Expense ID
+      responses:
+        '200':
+          description: Expense details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '404':
+          description: Expense not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /expenses/balance/summary:
+    get:
+      tags:
+        - Expenses
+      summary: Get balance summary
+      description: Get balance summary for the current authenticated user
+      operationId: getUserBalanceSummary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Balance summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBalanceSummaryResponse'
+
+  /expenses/friend/{friendId}/expenses:
+    get:
+      tags:
+        - Expenses
+      summary: Get friend expenses
+      description: Get expenses between current user and a friend
+      operationId: getExpensesBetweenFriends
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Friend ID
+      responses:
+        '200':
+          description: Friend expenses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendExpensesResponse'
+
+  /balances/summary:
+    get:
+      tags:
+        - Balances
+      summary: Get balance summary
+      description: Get balance summary for the current authenticated user
+      operationId: getBalanceSummary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Balance summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBalanceSummaryResponse'
+
+  /balances/friends:
+    get:
+      tags:
+        - Balances
+      summary: Get friend balances
+      description: Get friend balances for the current authenticated user
+      operationId: getFriendBalances
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of friend balances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendBalanceResponse'
+
+  /balances/friend/{friendId}/expenses:
+    get:
+      tags:
+        - Balances
+      summary: Get friend expenses
+      description: Get detailed expenses between current user and a friend
+      operationId: getFriendExpenses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Friend ID
+      responses:
+        '200':
+          description: Friend expenses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendExpensesResponse'
+
+  /balances/groups:
+    get:
+      tags:
+        - Balances
+      summary: Get group balances
+      description: Get group balances for the current authenticated user
+      operationId: getUserGroupBalances
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of group balances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupBalanceResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login or /auth/register
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 6
+          description: User's password
+
+    RegistrationRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 6
+          description: User's password
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: User's full name
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        message:
+          type: string
+          description: Response message
+
+    UserInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+
+    FriendRequestDto:
+      type: object
+      required:
+        - senderId
+        - receiverId
+      properties:
+        senderId:
+          type: integer
+          description: Sender's user ID
+        receiverId:
+          type: integer
+          description: Receiver's user ID
+        message:
+          type: string
+          description: Optional message
+
+    FriendRequestResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Friend request ID
+        senderName:
+          type: string
+          description: Sender's name
+        senderEmail:
+          type: string
+          format: email
+          description: Sender's email
+        createdAt:
+          type: string
+          format: date-time
+          description: Request creation timestamp
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, REJECTED, CANCELLED]
+          description: Request status
+        sender:
+          $ref: '#/components/schemas/UserResponse'
+        receiver:
+          $ref: '#/components/schemas/UserResponse'
+
+    FriendResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Friend's user ID
+        name:
+          type: string
+          description: Friend's name
+        email:
+          type: string
+          format: email
+          description: Friend's email
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID
+        name:
+          type: string
+          description: User's name
+        email:
+          type: string
+          format: email
+          description: User's email
+
+    CreateGroupRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Group name
+        memberIds:
+          type: array
+          items:
+            type: string
+          description: List of user IDs to add as members
+
+    GroupResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Group ID
+        name:
+          type: string
+          description: Group name
+        createdBy:
+          type: integer
+          description: Creator's user ID
+        createdByName:
+          type: string
+          description: Creator's name
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMemberResponse'
+
+    GroupMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Member's user ID
+        name:
+          type: string
+          description: Member's name
+        email:
+          type: string
+          format: email
+          description: Member's email
+
+    CreateExpenseRequest:
+      type: object
+      required:
+        - title
+        - amount
+        - paidBy
+        - participants
+      properties:
+        title:
+          type: string
+          description: Expense title
+        description:
+          type: string
+          description: Expense description
+        amount:
+          type: number
+          format: decimal
+          description: Expense amount
+        currency:
+          type: string
+          default: USD
+          description: Currency code
+        category:
+          type: string
+          description: Expense category
+        paidAt:
+          type: string
+          format: date-time
+          description: When the expense was paid
+        paidBy:
+          type: integer
+          description: User ID who paid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantRequest'
+
+    ParticipantRequest:
+      type: object
+      required:
+        - userId
+        - amount
+        - source
+      properties:
+        userId:
+          type: integer
+          description: Participant's user ID
+        amount:
+          type: number
+          format: decimal
+          description: Amount owed by this participant
+        source:
+          type: string
+          enum: [FRIEND, GROUP]
+          description: How participant was added
+        sourceId:
+          type: integer
+          description: Friend ID or Group ID
+
+    ExpenseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Expense ID
+        title:
+          type: string
+          description: Expense title
+        description:
+          type: string
+          description: Expense description
+        amount:
+          type: number
+          format: decimal
+          description: Total expense amount
+        currency:
+          type: string
+          description: Currency code
+        category:
+          type: string
+          description: Expense category
+        paidAt:
+          type: string
+          format: date-time
+          description: When expense was paid
+        createdAt:
+          type: string
+          format: date-time
+          description: When expense was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When expense was last updated
+        paidBy:
+          type: integer
+          description: User ID who paid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantResponse'
+
+    ParticipantResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: Participant's user ID
+        userName:
+          type: string
+          description: Participant's name
+        amount:
+          type: number
+          format: decimal
+          description: Amount owed by participant
+        source:
+          type: string
+          enum: [FRIEND, GROUP]
+          description: How participant was added
+        sourceId:
+          type: integer
+          description: Friend ID or Group ID
+        isActive:
+          type: boolean
+          description: Whether participant is active
+
+    UserBalanceSummaryResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: User ID
+        userName:
+          type: string
+          description: User's name
+        totalOwed:
+          type: number
+          format: decimal
+          description: Total amount others owe to this user
+        totalOwes:
+          type: number
+          format: decimal
+          description: Total amount this user owes to others
+        netBalance:
+          type: number
+          format: decimal
+          description: Net balance (totalOwed - totalOwes)
+
+    FriendBalanceResponse:
+      type: object
+      properties:
+        friendId:
+          type: integer
+          description: Friend's user ID
+        friendName:
+          type: string
+          description: Friend's name
+        balance:
+          type: number
+          format: decimal
+          description: Balance (positive = friend owes you, negative = you owe friend)
+
+    FriendExpensesResponse:
+      type: object
+      properties:
+        friendId:
+          type: integer
+          description: Friend's user ID
+        friendName:
+          type: string
+          description: Friend's name
+        totalOwedToFriend:
+          type: number
+          format: decimal
+          description: Amount user owes to friend
+        totalOwedByFriend:
+          type: number
+          format: decimal
+          description: Amount friend owes to user
+        netBalance:
+          type: number
+          format: decimal
+          description: Net balance (totalOwedByFriend - totalOwedToFriend)
+        sharedExpenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpenseResponse'
+
+    GroupBalanceResponse:
+      type: object
+      properties:
+        groupId:
+          type: integer
+          description: Group ID
+        groupName:
+          type: string
+          description: Group name
+        userId:
+          type: integer
+          description: User ID (optional, only in group balances endpoint)
+        userName:
+          type: string
+          description: User name (optional, only in group balances endpoint)
+        balance:
+          type: number
+          format: decimal
+          description: Balance (positive = group owes you, negative = you owe group)
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: Field-specific validation errors

@@ -14,6 +14,19 @@ import jakarta.validation.Valid;
 import java.util.List;
 import com.splitbuddy.splitbuddy.dto.response.FriendRequestResponse;
 
+/**
+ * Friend Controller
+ * 
+ * Handles friend requests and friend management.
+ * 
+ * Frontend Types: See expo/splitbuddy/src/types/api-contracts.ts
+ * - FriendRequestDto, FriendRequestResponse, FriendResponse
+ * 
+ * API Documentation: See backend/API_DOCUMENTATION.md#friends
+ * OpenAPI Spec: See backend/openapi.yaml#/paths/friends
+ * 
+ * @see expo/splitbuddy/src/utils/api.ts for frontend API functions
+ */
 @RestController
 @RequestMapping("/api/friends")
 @CrossOrigin(origins = "*")
